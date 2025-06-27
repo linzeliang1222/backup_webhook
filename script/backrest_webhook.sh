@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-wechat_key="YOUR_KEY"
+WECHAT_KEY="<YOUR_KEY>"
 
 send_wechat_message() {
   message=$1
-  response=$(curl "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=$wechat_key" \
+  response=$(curl "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=$WECHAT_KEY" \
    -H "Content-Type: application/json" \
    -d "{\"msgtype\": \"text\",\"text\": {\"content\": \"$message\"}}")
   if ! echo "$response" | grep -q '"errcode":0'; then
@@ -19,30 +19,30 @@ build_and_send_message() {
   message=""
   case "$event_oper" in
     "start")
-      message="🚀 开始$event_name_desc......"
+      message="🚀【Restic】开始$event_name_desc......"
       ;;
     "success")
-      message="✅ $event_name_desc成功～"
+      message="✅【Restic】$event_name_desc成功～"
       ;;
     "error")
-      message="❌ $event_name_desc发生异常！"
+      message="❌【Restic】$event_name_desc发生异常！"
       ;;
     "warning")
-      message="⚠️ $event_name_desc发生警告！"
+      message="⚠️【Restic】$event_name_desc发生警告！"
       ;;
     "skipped")
-      message="🚫 跳过$event_name_desc！"
+      message="⏭️【Restic】跳过$event_name_desc！"
       ;;
     *)
       case "$event_name" in
         "error")
-          message="❌ 发生异常！"
+          message="❌【Restic】发生异常！"
           ;;
         "unknown")
-          message="❌ 发送未知错误！"
+          message="❌【Restic】发送未知错误！"
           ;;
         *)
-          message="🏷️ 未知操作"
+          message="❓【Restic】未知操作"
           ;;
       esac
       ;;
@@ -57,7 +57,7 @@ build_and_send_message() {
     message="$message\n计划：{{ .Plan.Id }}"
   {{ end }}
   {{ if .SnapshotId -}}
-    message="$message\n快照ID：{{ .SnapshotId }}"
+    message="$message\n快照ID：{{ slice .SnapshotId 0 8 }}"
   {{ end }}
   {{ if .Duration }}
     message="$message\n操作耗时：{{ .FormatDuration .Duration }}"
@@ -66,17 +66,17 @@ build_and_send_message() {
     message="$message\n错误消息：$(echo {{ .ShellEscape .Error }} | sed 's/"/\\"/g')"
   {{ else -}}
     {{ if .SnapshotStats -}}
-        message="$message\n----- 概览 -----"
+        message="$message\n--------- 概览 ---------"
         message="$message\n增量数据大小：{{ .FormatSizeBytes .SnapshotStats.DataAdded }}"
         message="$message\n处理的总文件数：{{ .SnapshotStats.TotalFilesProcessed }}"
         message="$message\n处理的总字节数：{{ .FormatSizeBytes .SnapshotStats.TotalBytesProcessed }}"
-        message="$message\n--- 备份统计 ---"
+        message="$message\n------- 备份统计 -------"
         message="$message\n新增文件数：{{ .SnapshotStats.FilesNew }}"
         message="$message\n更改文件数：{{ .SnapshotStats.FilesChanged }}"
-        message="$message\n未更改文件数：{{ .SnapshotStats.FilesUnmodified }}"
+        #message="$message\n未更改文件数：{{ .SnapshotStats.FilesUnmodified }}"
         message="$message\n新增目录数：{{ .SnapshotStats.DirsNew }}"
         message="$message\n更改目录数：{{ .SnapshotStats.DirsChanged }}"
-        message="$message\n未更改目录数：{{ .SnapshotStats.DirsUnmodified }}"
+        #message="$message\n未更改目录数：{{ .SnapshotStats.DirsUnmodified }}"
         message="$message\n备份持续时间：{{ .SnapshotStats.TotalDuration }}s"
     {{ end }}
   {{ end }}
